@@ -60,7 +60,7 @@ The full form of an ARM is an advanced reduced instruction set computer (RISC) m
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -72,9 +72,10 @@ The full form of an ARM is an advanced reduced instruction set computer (RISC) m
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdbool.h>
-void push_button();
-bool button_status;
+#include "stdio.h"
+#include "stdbool.h"
+bool pb;
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -88,6 +89,7 @@ bool button_status;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -119,6 +121,7 @@ static void MX_GPIO_Init(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -149,24 +152,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  pb=HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13);
+	  if(pb==0)
+	  {
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+	  }
+	  else
+	  {
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  push_button();
   }
   /* USER CODE END 3 */
-}
-void push_button()
-{
-	button_status = HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13);
-	if(button_status==0)
-	{
-		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
-	}
-	else
-	{
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
-		}
 }
 
 /**
@@ -180,27 +180,28 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+                              |RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
@@ -216,6 +217,9 @@ void SystemClock_Config(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -227,7 +231,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA5 */
@@ -237,6 +241,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -257,8 +264,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
@@ -275,16 +281,10 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 ```
-
-
 ## Output  :
- <img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/553984ca-e7e9-4355-abf0-fb48cbaf86c1" />
- <img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/fcea11f1-ad02-4788-bc13-36cfcf011e68" />
+<img width="1268" height="1363" alt="WhatsApp Image 2026-05-21 at 6 57 59 PM" src="https://github.com/user-attachments/assets/e562406e-eeea-425c-be63-a17b7e447bbe" />
 
+<img width="1288" height="1419" alt="WhatsApp Image 2026-05-21 at 6 57 56 PM" src="https://github.com/user-attachments/assets/3766b88f-505e-4b00-b600-0a070089a37c" />
 
-## layout of the circuit 
- <img width="1062" height="722" alt="image" src="https://github.com/user-attachments/assets/16046eff-20aa-4740-8dca-733ace77d9e9" />
-
- 
 ## Result :
 Interfacing a digital Input (Pushbutton ) with ARM microcontroller based IOT development is executed and the results are verified.
